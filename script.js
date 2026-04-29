@@ -6,14 +6,12 @@ let petalIntervalId = null;
 
 if (form && message) {
   form.addEventListener("submit", async (event) => {
-    if (window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1") {
-      return;
-    }
-
     event.preventDefault();
 
     const submitButton = form.querySelector('button[type="submit"]');
     const formData = new FormData(form);
+    const isLocalhost =
+      window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
     const payload = {
       fullName: String(formData.get("fullName") || "").trim(),
       attendance: String(formData.get("attendance") || "").trim(),
@@ -30,24 +28,44 @@ if (form && message) {
       submitButton.textContent = "Saving RSVP...";
     }
 
-    message.textContent = "Saving your RSVP to the guest sheet...";
+    message.textContent = isLocalhost
+      ? "Saving your RSVP to the guest sheet..."
+      : "Sending your RSVP with love...";
 
     try {
-      const response = await fetch("/api/rsvp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
+      if (isLocalhost) {
+        const response = await fetch("/api/rsvp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
 
-      const result = await response.json();
+        const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || "Could not save your RSVP.");
+        if (!response.ok) {
+          throw new Error(result.error || "Could not save your RSVP.");
+        }
+
+        message.textContent = `${result.message} The Excel guest sheet has been updated.`;
+      } else {
+        const response = await fetch("/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
+          body: new URLSearchParams(formData).toString()
+        });
+
+        if (!response.ok) {
+          throw new Error("Could not submit your RSVP right now.");
+        }
+
+        window.location.href = "/success.html";
+        return;
       }
 
-      message.textContent = `${result.message} The Excel guest sheet has been updated.`;
       form.reset();
     } catch (error) {
       message.textContent = error.message || "Could not save your RSVP right now.";
@@ -87,12 +105,13 @@ function spawnPagePetals(count = 16) {
   );
   const scrollProgress = Math.min(window.scrollY / scrollableHeight, 1);
   const densityFactor = 1 - scrollProgress * 0.75;
-  const adjustedCount = Math.max(2, Math.round(count * densityFactor));
+  const mobileFactor = window.innerWidth <= 820 ? 0.58 : 1;
+  const adjustedCount = Math.max(2, Math.round(count * densityFactor * mobileFactor));
 
   for (let index = 0; index < adjustedCount; index += 1) {
     const petal = document.createElement("span");
     const size = 10 + Math.random() * 10;
-    const duration = 4 + Math.random() * 3;
+    const duration = (window.innerWidth <= 820 ? 5.5 : 4.6) + Math.random() * 2.8;
 
     petal.className = "page-petal";
     petal.style.left = `${Math.random() * 100}%`;
@@ -113,8 +132,8 @@ if (pagePetals) {
   window.addEventListener("load", () => {
     spawnPagePetals(24);
     petalIntervalId = window.setInterval(() => {
-      spawnPagePetals(10);
-    }, 3200);
+      spawnPagePetals(window.innerWidth <= 820 ? 7 : 10);
+    }, window.innerWidth <= 820 ? 4000 : 3200);
   });
 
   window.addEventListener("beforeunload", () => {
