@@ -494,17 +494,6 @@ body::before {
   font-weight: 700;
 }
 
-.form-note {
-  margin: 10px 8px 0;
-  text-align: center;
-  color: var(--muted);
-}
-
-.form-note a {
-  color: var(--accent-deep);
-  font-weight: 700;
-}
-
 .bot-field {
   display: none;
 }
