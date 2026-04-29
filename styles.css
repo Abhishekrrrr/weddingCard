@@ -42,6 +42,34 @@ body::before {
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 85%);
 }
 
+.page-petals {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 20;
+}
+
+.page-petal {
+  position: absolute;
+  top: -24px;
+  width: 14px;
+  height: 18px;
+  border-radius: 14px 14px 14px 2px;
+  background: linear-gradient(180deg, #ffdce9, #ef8fb4);
+  opacity: 0.82;
+  animation: pagePetalFall linear forwards;
+  box-shadow: 0 2px 8px rgba(181, 77, 119, 0.14);
+}
+
+.page-petal:nth-child(3n) {
+  background: linear-gradient(180deg, #fff2b0, #f4b97f);
+}
+
+.page-petal:nth-child(2n) {
+  background: linear-gradient(180deg, #ffe9f2, #df7ea5);
+}
+
 .page-shell {
   width: min(1100px, calc(100% - 32px));
   margin: 0 auto;
@@ -283,7 +311,6 @@ body::before {
 .detail-card p,
 .timeline-card p,
 .timeline-card span,
-.love-card p,
 .closing-card p,
 .rsvp-form label,
 .note-card {
@@ -307,9 +334,9 @@ body::before {
   font-size: 0.95rem;
 }
 
+
 .timeline,
-.details-grid,
-.love-grid {
+.details-grid {
   display: grid;
   gap: 16px;
 }
@@ -322,10 +349,6 @@ body::before {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.love-grid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .timeline-day {
   margin-top: 0;
   margin-bottom: 8px;
@@ -335,14 +358,12 @@ body::before {
 
 .timeline-card h3,
 .detail-card h3,
-.love-card h3,
 .closing-card h2 {
   margin: 0 0 8px;
   font-size: 2rem;
   color: var(--text);
 }
 
-.love-card,
 .closing-card {
   padding: 22px;
   border-radius: 28px;
@@ -350,19 +371,6 @@ body::before {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 238, 245, 0.84));
   box-shadow: var(--shadow);
-}
-
-.love-card {
-  position: relative;
-}
-
-.love-card::after {
-  content: "❤";
-  position: absolute;
-  right: 18px;
-  top: 14px;
-  color: rgba(222, 126, 162, 0.3);
-  font-size: 1.1rem;
 }
 
 .note-card {
@@ -532,6 +540,20 @@ body::before {
   }
 }
 
+@keyframes pagePetalFall {
+  0% {
+    transform: translate3d(0, -20px, 0) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate3d(var(--petal-drift, 0), 108vh, 0) rotate(360deg);
+    opacity: 0;
+  }
+}
+
 @media (max-width: 820px) {
   .hero {
     min-height: auto;
@@ -540,8 +562,7 @@ body::before {
 
   .hero-meta,
   .timeline,
-  .details-grid,
-  .love-grid {
+  .details-grid {
     grid-template-columns: 1fr;
   }
 
@@ -582,7 +603,6 @@ body::before {
 
   .timeline-card h3,
   .detail-card h3,
-  .love-card h3,
   .closing-card h2 {
     font-size: 1.65rem;
   }
@@ -590,7 +610,6 @@ body::before {
   .hero-meta div,
   .timeline-card,
   .detail-card,
-  .love-card,
   .closing-card,
   .venue-card,
   .rsvp-form,

@@ -1,6 +1,8 @@
 const form = document.querySelector("#rsvp-form");
 const message = document.querySelector(".form-message");
 const mapElement = document.querySelector("#venue-map");
+const pagePetals = document.querySelector("#page-petals");
+let petalIntervalId = null;
 
 if (form && message) {
   form.addEventListener("submit", async (event) => {
@@ -72,4 +74,52 @@ if (mapElement && window.L) {
   }).addTo(map);
 
   L.marker([lat, lng]).addTo(map).bindPopup(title).openPopup();
+}
+
+function spawnPagePetals(count = 16) {
+  if (!pagePetals) {
+    return;
+  }
+
+  const scrollableHeight = Math.max(
+    document.documentElement.scrollHeight - window.innerHeight,
+    1
+  );
+  const scrollProgress = Math.min(window.scrollY / scrollableHeight, 1);
+  const densityFactor = 1 - scrollProgress * 0.75;
+  const adjustedCount = Math.max(2, Math.round(count * densityFactor));
+
+  for (let index = 0; index < adjustedCount; index += 1) {
+    const petal = document.createElement("span");
+    const size = 10 + Math.random() * 10;
+    const duration = 4 + Math.random() * 3;
+
+    petal.className = "page-petal";
+    petal.style.left = `${Math.random() * 100}%`;
+    petal.style.width = `${size}px`;
+    petal.style.height = `${size * 1.25}px`;
+    petal.style.animationDuration = `${duration}s`;
+    petal.style.animationDelay = `${index * 0.12}s`;
+    petal.style.setProperty("--petal-drift", `${(Math.random() - 0.5) * 180}px`);
+    pagePetals.appendChild(petal);
+
+    window.setTimeout(() => {
+      petal.remove();
+    }, (duration + 1) * 1000);
+  }
+}
+
+if (pagePetals) {
+  window.addEventListener("load", () => {
+    spawnPagePetals(24);
+    petalIntervalId = window.setInterval(() => {
+      spawnPagePetals(10);
+    }, 3200);
+  });
+
+  window.addEventListener("beforeunload", () => {
+    if (petalIntervalId) {
+      window.clearInterval(petalIntervalId);
+    }
+  });
 }
